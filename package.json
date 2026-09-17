@@ -7,12 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "db:push": "drizzle-kit push --force",
     "db:seed": "tsx src/db/seed.ts",
     "db:setup": "npm run db:push && npm run db:seed",
     "job:update": "tsx src/jobs/update.ts",
-    "job:health": "tsx src/jobs/health-report.ts"
+    "job:health": "tsx src/jobs/health-report.ts",
+    "typegen": "next typegen"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

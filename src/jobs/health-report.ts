@@ -3,8 +3,12 @@ import { registerAllSources } from "@/data-sources";
 import { formatDateTime } from "@/components/empty-state";
 
 /**
- * Prints the nationwide coverage report. Also usable as a CI notification body:
- * exit code is 1 when any source has failed, so a scheduled job can alert.
+ * Prints the nationwide coverage report.
+ *
+ * Data sources fail for ordinary reasons (a site is down, a bot is blocked), so
+ * by default this never fails the pipeline — the report and the stored
+ * `data_health` rows are the signal. Pass `--strict` to exit 1 when a source is
+ * failing, for use by an alerting job.
  */
 async function main(): Promise<void> {
   registerAllSources();
@@ -67,7 +71,7 @@ async function main(): Promise<void> {
     }
   }
 
-  if (failed.length > 0) process.exitCode = 1;
+  if (process.argv.includes("--strict") && failed.length > 0) process.exitCode = 1;
 }
 
 main().catch((error) => {
