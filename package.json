@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "db:push": "drizzle-kit push --force",
+    "db:push": "node -e \"require('node:fs').mkdirSync('data',{recursive:true})\" && drizzle-kit push --force",
     "db:seed": "tsx src/db/seed.ts",
     "db:setup": "npm run db:push && npm run db:seed",
     "job:update": "tsx src/jobs/update.ts",
