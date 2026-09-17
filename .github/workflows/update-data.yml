@@ -1,0 +1,68 @@
+name: Update league data
+
+# Each source is an independent unit. One prefecture failing never stops the
+# others: the runner records the error and keeps the previous data.
+on:
+  schedule:
+    # Hourly. Per-source refresh intervals decide what actually runs, which
+    # keeps normal days light and match days close to real time.
+    - cron: "0 * * * *"
+    # Full sweep a few times a day, ignoring the interval guard.
+    - cron: "17 1,7,13,19 * * *"
+  workflow_dispatch:
+    inputs:
+      selector:
+        description: "all | national | pref:fukuoka | source:jfa-premier-west"
+        required: false
+        default: "all"
+      respect_interval:
+        description: "Skip sources updated recently (true/false)"
+        required: false
+        default: "false"
+
+concurrency:
+  group: update-league-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+
+      - name: Prepare database
+        run: npm run db:setup
+
+      # A prefecture's data source failing must not fail the whole sweep, so the
+      # runner exits 0 unless *every* attempted source failed.
+      - name: Update sources
+        env:
+          DATA_SOURCE_USER_AGENT: ${{ secrets.DATA_SOURCE_USER_AGENT }}
+          SEASON_YEAR: "2026"
+        run: |
+          SELECTOR="${{ github.event.inputs.selector || 'all' }}"
+          RESPECT="${{ github.event.inputs.respect_interval || 'false' }}"
+          EXTRA=""
+          if [ "$RESPECT" = "true" ]; then EXTRA="--respect-interval"; fi
+          npm run job:update -- --"$SELECTOR" --concurrency=4 $EXTRA
+
+      - name: Coverage report
+        run: npm run job:health
+
+      - name: Upload database snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: league-data
+          path: data/app.db
+          retention-days: 7
+          if-no-files-found: ignore

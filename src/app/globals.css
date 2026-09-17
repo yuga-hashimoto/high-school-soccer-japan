@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent: #1d4ed8;
+  --color-accent-strong: #1e40af;
+  --color-accent-soft: #f2f6ff;
+  --color-line: #e7e9ec;
+  --color-line-strong: #d5d8dd;
+  --color-ink: #17181a;
+  --color-ink-soft: #4b5158;
+  --color-muted: #767d86;
+  --color-positive: #1a7f4b;
+  --color-negative: #b3261e;
+  --color-warn: #9a6700;
+
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans", Meiryo, "Noto Sans JP", sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Numeric columns should never jitter between rows. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
